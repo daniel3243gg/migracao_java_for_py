@@ -1,0 +1,716 @@
+openapi: 3.0.3
+info:
+  title: API do Sistema de Estacionamento Legado
+  version: 1.0.0
+  description: |
+    Contrato das rotas efetivamente registradas por `aula-projeto-legado`.
+    A API roda por padrão na porta 8080. Os exemplos e schemas refletem o
+    comportamento atual do código, inclusive respostas de erro e limitações
+    conhecidas; este arquivo não representa uma proposta de correção.
+
+servers:
+  - url: http://localhost:8080
+    description: Servidor local do legado
+
+tags:
+  - name: Clientes
+  - name: Veículos
+  - name: Vagas
+  - name: Permanências
+  - name: Dashboard
+
+paths:
+  /api/clientes:
+    get:
+      tags: [Clientes]
+      summary: Lista clientes
+      responses:
+        '200':
+          description: Lista ordenada por nome.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Cliente'
+        '500':
+          $ref: '#/components/responses/ErroBanco'
+    post:
+      tags: [Clientes]
+      summary: Cadastra cliente
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ClienteInput'
+      responses:
+        '201':
+          description: Cliente criado.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Cliente'
+        '400':
+          description: Nome ou CPF ausente/vazio.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Erro' }
+        '409':
+          description: CPF já cadastrado.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Erro' }
+        '500':
+          $ref: '#/components/responses/ErroBanco'
+
+  /api/clientes/{id}:
+    parameters:
+      - $ref: '#/components/parameters/Id'
+    get:
+      tags: [Clientes]
+      summary: Consulta cliente por ID
+      responses:
+        '200':
+          description: Cliente encontrado.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Cliente' }
+        '400':
+          $ref: '#/components/responses/IdInvalido'
+        '404':
+          description: Cliente não encontrado.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Erro' }
+        '500':
+          $ref: '#/components/responses/ErroBanco'
+    put:
+      tags: [Clientes]
+      summary: Altera cliente
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/ClienteInput' }
+      responses:
+        '200':
+          description: Cliente atualizado. O ID vem do caminho.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Cliente' }
+        '400':
+          description: ID inválido ou nome/CPF ausente/vazio.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Erro' }
+        '404':
+          description: Cliente não encontrado.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Erro' }
+        '500':
+          $ref: '#/components/responses/ErroBanco'
+    delete:
+      tags: [Clientes]
+      summary: Exclui cliente
+      description: Pode excluir veículos em cascata conforme a FK do banco.
+      responses:
+        '200':
+          description: Cliente excluído.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Mensagem' }
+        '400':
+          $ref: '#/components/responses/IdInvalido'
+        '404':
+          description: Cliente não encontrado.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Erro' }
+        '409':
+          description: Violação de chave estrangeira (mensagem pode mencionar veículos).
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Erro' }
+        '500':
+          $ref: '#/components/responses/ErroBanco'
+
+  /api/veiculos:
+    get:
+      tags: [Veículos]
+      summary: Lista veículos
+      responses:
+        '200':
+          description: Lista ordenada por placa, com nome do cliente.
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/Veiculo' }
+        '500':
+          $ref: '#/components/responses/ErroBanco'
+    post:
+      tags: [Veículos]
+      summary: Cadastra veículo
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/VeiculoInput' }
+      responses:
+        '201':
+          description: Veículo criado.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Veiculo' }
+        '400':
+          description: Campo obrigatório ausente/vazio.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Erro' }
+        '409':
+          description: Placa já cadastrada.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Erro' }
+        '500':
+          description: Erro de banco, inclusive cliente inexistente ou tamanho excedido.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Erro' }
+
+  /api/veiculos/{id}:
+    parameters:
+      - $ref: '#/components/parameters/Id'
+    get:
+      tags: [Veículos]
+      summary: Consulta veículo por ID
+      responses:
+        '200':
+          description: Veículo encontrado.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Veiculo' }
+        '400':
+          $ref: '#/components/responses/IdInvalido'
+        '404':
+          description: Veículo não encontrado.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Erro' }
+        '500':
+          $ref: '#/components/responses/ErroBanco'
+    put:
+      tags: [Veículos]
+      summary: Altera veículo
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/VeiculoInput' }
+      responses:
+        '200':
+          description: Veículo atualizado.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Veiculo' }
+        '400':
+          description: ID inválido ou campo obrigatório ausente/vazio.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Erro' }
+        '404':
+          description: Veículo não encontrado.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Erro' }
+        '500':
+          $ref: '#/components/responses/ErroBanco'
+    delete:
+      tags: [Veículos]
+      summary: Exclui veículo
+      responses:
+        '200':
+          description: Veículo excluído.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Mensagem' }
+        '400':
+          $ref: '#/components/responses/IdInvalido'
+        '404':
+          description: Veículo não encontrado.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Erro' }
+        '409':
+          description: Veículo possui permanências registradas.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Erro' }
+        '500':
+          $ref: '#/components/responses/ErroBanco'
+
+  /api/vagas:
+    get:
+      tags: [Vagas]
+      summary: Lista vagas
+      parameters:
+        - $ref: '#/components/parameters/StatusVagaQuery'
+      responses:
+        '200':
+          description: Lista ordenada por número.
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/Vaga' }
+        '500':
+          $ref: '#/components/responses/ErroBanco'
+    post:
+      tags: [Vagas]
+      summary: Cadastra vaga
+      description: O status enviado é ignorado; a vaga é criada como LIVRE.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/VagaInput' }
+      responses:
+        '201':
+          description: Vaga criada com status LIVRE.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Vaga' }
+        '400':
+          description: Número ausente/vazio ou tipo inválido.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Erro' }
+        '409':
+          description: Número de vaga já cadastrado.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Erro' }
+        '500':
+          $ref: '#/components/responses/ErroBanco'
+
+  /api/vagas/{id}:
+    parameters:
+      - $ref: '#/components/parameters/Id'
+    get:
+      tags: [Vagas]
+      summary: Consulta vaga por ID
+      responses:
+        '200':
+          description: Vaga encontrada.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Vaga' }
+        '400':
+          $ref: '#/components/responses/IdInvalido'
+        '404':
+          description: Vaga não encontrada.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Erro' }
+        '500':
+          $ref: '#/components/responses/ErroBanco'
+    put:
+      tags: [Vagas]
+      summary: Altera vaga
+      description: Status nulo ou inválido é substituído por LIVRE; a alteração não verifica permanências abertas.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/VagaUpdate' }
+      responses:
+        '200':
+          description: Vaga atualizada.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Vaga' }
+        '400':
+          description: ID inválido, número ausente/vazio ou tipo inválido.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Erro' }
+        '404':
+          description: Vaga não encontrada.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Erro' }
+        '500':
+          $ref: '#/components/responses/ErroBanco'
+    delete:
+      tags: [Vagas]
+      summary: Exclui vaga
+      responses:
+        '200':
+          description: Vaga excluída.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Mensagem' }
+        '400':
+          $ref: '#/components/responses/IdInvalido'
+        '404':
+          description: Vaga não encontrada.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Erro' }
+        '409':
+          description: Vaga possui permanências registradas.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Erro' }
+        '500':
+          $ref: '#/components/responses/ErroBanco'
+
+  /api/permanencias:
+    get:
+      tags: [Permanências]
+      summary: Lista permanências
+      parameters:
+        - $ref: '#/components/parameters/StatusPermanenciaQuery'
+      responses:
+        '200':
+          description: Lista ordenada pela entrada mais recente.
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/Permanencia' }
+        '500':
+          $ref: '#/components/responses/ErroBanco'
+
+  /api/permanencias/entrada:
+    post:
+      tags: [Permanências]
+      summary: Registra entrada
+      description: Marca a vaga como OCUPADA e cria permanência ABERTO na mesma transação.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/EntradaInput' }
+      responses:
+        '201':
+          description: Entrada registrada.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Permanencia' }
+        '400':
+          description: "veiculoId ou vagaId ausente, inválido ou JSON malformado."
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Erro' }
+        '404':
+          description: Vaga não encontrada.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Erro' }
+        '409':
+          description: Veículo já possui permanência aberta ou vaga está ocupada.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Erro' }
+        '500':
+          description: Erro de banco, inclusive veículo inexistente.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Erro' }
+
+  /api/permanencias/{id}:
+    parameters:
+      - $ref: '#/components/parameters/Id'
+    get:
+      tags: [Permanências]
+      summary: Consulta permanência por ID
+      description: |
+        Quando encontrada, retorna a permanência. No código atual, quando o ID
+        não existe o controller não envia uma resposta HTTP; portanto não há
+        um 404 efetivamente implementado para este caso.
+      responses:
+        '200':
+          description: Permanência encontrada.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Permanencia' }
+        '400':
+          $ref: '#/components/responses/IdInvalido'
+        '500':
+          $ref: '#/components/responses/ErroBanco'
+
+  /api/permanencias/{id}/saida:
+    parameters:
+      - $ref: '#/components/parameters/Id'
+    put:
+      tags: [Permanências]
+      summary: Registra saída
+      description: Finaliza a permanência, calcula o valor e libera a vaga na mesma transação.
+      responses:
+        '200':
+          description: Saída registrada.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Permanencia' }
+        '400':
+          $ref: '#/components/responses/IdInvalido'
+        '404':
+          description: Permanência não encontrada.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Erro' }
+        '409':
+          description: Permanência já foi finalizada.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Erro' }
+        '500':
+          $ref: '#/components/responses/ErroBanco'
+
+  /api/dashboard:
+    get:
+      tags: [Dashboard]
+      summary: Consulta indicadores do dashboard
+      responses:
+        '200':
+          description: Indicadores derivados das tabelas de vagas e permanências.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Dashboard' }
+        '500':
+          $ref: '#/components/responses/ErroBanco'
+
+components:
+  parameters:
+    Id:
+      name: id
+      in: path
+      required: true
+      description: Identificador numérico da entidade.
+      schema:
+        type: integer
+        format: int64
+        minimum: 0
+    StatusVagaQuery:
+      name: status
+      in: query
+      required: false
+      description: Filtro textual aplicado diretamente ao status da vaga.
+      schema:
+        type: string
+        enum: [LIVRE, OCUPADA]
+    StatusPermanenciaQuery:
+      name: status
+      in: query
+      required: false
+      description: Filtro textual aplicado diretamente ao status da permanência.
+      schema:
+        type: string
+        enum: [ABERTO, FINALIZADO]
+
+  responses:
+    IdInvalido:
+      description: ID não numérico.
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Erro' }
+    ErroBanco:
+      description: Erro de banco de dados não tratado especificamente.
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Erro' }
+
+  schemas:
+    Erro:
+      type: object
+      required: [error]
+      properties:
+        error:
+          type: string
+          example: Cliente não encontrado
+    Mensagem:
+      type: object
+      required: [message]
+      properties:
+        message:
+          type: string
+          example: Cliente excluído com sucesso
+    ClienteInput:
+      type: object
+      required: [nome, cpf]
+      properties:
+        nome:
+          type: string
+          maxLength: 100
+        cpf:
+          type: string
+          maxLength: 14
+        telefone:
+          type: string
+          nullable: true
+          maxLength: 20
+        email:
+          type: string
+          nullable: true
+          maxLength: 100
+    Cliente:
+      allOf:
+        - $ref: '#/components/schemas/ClienteInput'
+        - type: object
+          required: [id]
+          properties:
+            id:
+              type: integer
+              format: int64
+    VeiculoInput:
+      type: object
+      required: [placa, marca, modelo, cor, clienteId]
+      properties:
+        placa:
+          type: string
+          maxLength: 10
+        marca:
+          type: string
+          maxLength: 50
+        modelo:
+          type: string
+          maxLength: 50
+        cor:
+          type: string
+          maxLength: 30
+        clienteId:
+          type: integer
+          format: int64
+    Veiculo:
+      allOf:
+        - $ref: '#/components/schemas/VeiculoInput'
+        - type: object
+          required: [id, clienteNome]
+          properties:
+            id:
+              type: integer
+              format: int64
+            clienteNome:
+              type: string
+              nullable: true
+    VagaInput:
+      type: object
+      required: [numero, tipo]
+      properties:
+        numero:
+          type: string
+          maxLength: 10
+        tipo:
+          type: string
+          enum: [CARRO, MOTO]
+        status:
+          type: string
+          description: Aceito no payload, mas ignorado no cadastro.
+          enum: [LIVRE, OCUPADA]
+    VagaUpdate:
+      type: object
+      required: [numero, tipo]
+      properties:
+        numero:
+          type: string
+          maxLength: 10
+        tipo:
+          type: string
+          enum: [CARRO, MOTO]
+        status:
+          type: string
+          nullable: true
+          description: Nulo ou valor inválido é convertido para LIVRE pelo controller.
+          enum: [LIVRE, OCUPADA]
+    Vaga:
+      allOf:
+        - $ref: '#/components/schemas/VagaInput'
+        - type: object
+          required: [id, status]
+          properties:
+            id:
+              type: integer
+              format: int64
+            status:
+              type: string
+              enum: [LIVRE, OCUPADA]
+    EntradaInput:
+      type: object
+      required: [veiculoId, vagaId]
+      properties:
+        veiculoId:
+          type: integer
+          format: int64
+        vagaId:
+          type: integer
+          format: int64
+    Permanencia:
+      type: object
+      required: [id, veiculoId, vagaId, dataHoraEntrada, status]
+      properties:
+        id:
+          type: integer
+          format: int64
+        veiculoId:
+          type: integer
+          format: int64
+        veiculoPlaca:
+          type: string
+          nullable: true
+        veiculoModelo:
+          type: string
+          nullable: true
+        vagaId:
+          type: integer
+          format: int64
+        vagaNumero:
+          type: string
+          nullable: true
+        dataHoraEntrada:
+          type: string
+          format: date-time
+          description: LocalDateTime serializado em ISO-8601, sem indicação de fuso.
+          example: '2026-10-29T19:30:00'
+        dataHoraSaida:
+          type: string
+          format: date-time
+          nullable: true
+        valorTotal:
+          type: number
+          format: double
+          nullable: true
+          example: 5.0
+        status:
+          type: string
+          enum: [ABERTO, FINALIZADO]
+    Dashboard:
+      type: object
+      required: [totalVagas, vagasLivres, vagasOcupadas, veiculosEstacionados]
+      properties:
+        totalVagas:
+          type: integer
+          format: int64
+        vagasLivres:
+          type: integer
+          format: int64
+        vagasOcupadas:
+          type: integer
+          format: int64
+        veiculosEstacionados:
+          type: integer
+          format: int64
+
+x-legacy-notes:
+  content-type: application/json; charset=UTF-8
+  cors:
+    allow-origin: '*'
+    allow-methods: 'GET, POST, PUT, DELETE, OPTIONS'
+    allow-headers: 'Content-Type, Authorization'
+  options: Preflight OPTIONS é respondido com 204 nos contextos registrados.
+  known-limitations:
+    - O controller de GET /api/permanencias/{id} não envia resposta quando a permanência não existe.
+    - A compatibilidade entre tipo de veículo e tipo de vaga não é validada.
+    - A API não possui autenticação implementada, apesar de anunciar Authorization no CORS.
