@@ -1,4 +1,7 @@
+from datetime import datetime
+
 from django.db import models
+from django.db.models import Q
 
 
 class Cliente(models.Model):
@@ -37,6 +40,11 @@ class Vaga(models.Model):
 
     class Meta:
         db_table = "vagas"
+        # choices não cria nada no banco; os CHECK reproduzem o init.sql do legado.
+        constraints = [
+            models.CheckConstraint(condition=Q(tipo__in=["CARRO", "MOTO"]), name="vagas_tipo_valido"),
+            models.CheckConstraint(condition=Q(status__in=["LIVRE", "OCUPADA"]), name="vagas_status_valido"),
+        ]
 
 
 class Permanencia(models.Model):
@@ -46,13 +54,18 @@ class Permanencia(models.Model):
 
     veiculo = models.ForeignKey(Veiculo, on_delete=models.PROTECT, related_name="permanencias")
     vaga = models.ForeignKey(Vaga, on_delete=models.PROTECT, related_name="permanencias")
-    data_hora_entrada = models.DateTimeField(auto_now_add=True)
+    # default (e não auto_now_add) para o serviço poder informar o horário de entrada
+    # (Tarefa 5); auto_now_add sobrescreve o valor passado no create.
+    data_hora_entrada = models.DateTimeField(default=datetime.now)
     data_hora_saida = models.DateTimeField(blank=True, null=True)
     valor_total = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
     status = models.CharField(max_length=10, choices=Status.choices, default=Status.ABERTO)
 
     class Meta:
         db_table = "permanencias"
+        constraints = [
+            models.CheckConstraint(condition=Q(status__in=["ABERTO", "FINALIZADO"]), name="permanencias_status_valido"),
+        ]
         indexes = [
             models.Index(fields=["status"]),
             models.Index(fields=["veiculo"]),

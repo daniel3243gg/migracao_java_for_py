@@ -6,11 +6,9 @@ SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY", "dev-only-key")
 DEBUG = os.environ.get("DJANGO_DEBUG", "1") == "1"
 ALLOWED_HOSTS = [host for host in os.environ.get("ALLOWED_HOSTS", "*").split(",") if host]
 
+# Sem auth, sessions e messages: o roteiro proíbe autenticação e sessões do Django.
 INSTALLED_APPS = [
     "django.contrib.contenttypes",
-    "django.contrib.auth",
-    "django.contrib.sessions",
-    "django.contrib.messages",
     "django.contrib.staticfiles",
     "api.apps.ApiConfig",
 ]
@@ -18,10 +16,7 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     "estacionamento.middleware.CorsMiddleware",
     "django.middleware.security.SecurityMiddleware",
-    "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
-    "django.contrib.auth.middleware.AuthenticationMiddleware",
-    "django.contrib.messages.middleware.MessageMiddleware",
 ]
 
 ROOT_URLCONF = "estacionamento.urls"
@@ -33,8 +28,6 @@ TEMPLATES = [
         "OPTIONS": {
             "context_processors": [
                 "django.template.context_processors.request",
-                "django.contrib.auth.context_processors.auth",
-                "django.contrib.messages.context_processors.messages",
             ],
         },
     },

@@ -6,10 +6,12 @@ Migrar futuramente o backend de `aula-projeto-legado` para um novo backend Djang
 
 ## Estado atual
 
-- Migração ainda não iniciada.
-- Nenhum backend Django criado.
+- Migração em andamento. Backend Django em `aula-projeto-novo/backend-django/`.
+- Tarefa 1 (configuração) concluída: Django 5.2 LTS, sem auth, sessões, mensagens nem CSRF, SQLite via `DB_PATH`, `USE_TZ = False`, `APPEND_SLASH = False`.
+- Tarefa 2 (models e migrations) concluída: models com `CheckConstraint` do `init.sql` e `data_hora_entrada` atribuível, `0001_initial` gerada pelo Django, `0002_seed_vagas` com as 15 vagas iniciais, testes em `api/tests/`. Detalhes e motivo em `work/02-breno.md`.
+- Tarefa 3 (parte de cadastros) concluída: views de clientes, veículos, vagas e dashboard, serialização manual em `api/serializacao.py` e rotas com e sem barra final. Detalhes em `work/02-breno.md`.
+- Views e serviço de permanência (Lemos), CORS completo e Docker Compose ainda pendentes.
 - Nenhuma alteração feita no frontend ou no backend legado.
-- Esta etapa criou somente a pasta `docs` e a pasta `ia` com sua memória inicial.
 - A execução foi organizada para seis pessoas em `work/geral.md` e nos arquivos individuais de cada integrante.
 - A ordem definida é: Daniel, Breno, Theo, Gabs, Petry e Lemos.
 
