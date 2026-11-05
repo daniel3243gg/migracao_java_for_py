@@ -10,16 +10,16 @@ Daniel deve ter concluído a análise e deixado a estrutura `backend-django/` in
 
 ## Tarefas
 
-- [ ] Criar a estrutura `api/views/` e `api/urls.py`.
-- [ ] Implementar `cliente_views.py` para listar, criar, consultar, atualizar e excluir clientes.
-- [ ] Implementar `veiculo_views.py` para listar, criar, consultar, atualizar e excluir veículos.
-- [ ] Implementar `vaga_views.py` para listar, criar, consultar, atualizar e excluir vagas.
-- [ ] Implementar `to_dict()` manual para cada model.
-- [ ] Usar `select_related('cliente')` nos veículos.
-- [ ] Validar JSON, métodos HTTP, campos obrigatórios e duplicidades.
-- [ ] Retornar HTTP 404, 409 e 400 conforme o roteiro.
-- [ ] Configurar o include das URLs da API no projeto Django.
-- [ ] Testar os endpoints CRUD com requisições locais.
+- [x] Criar a estrutura `api/views/` e `api/urls.py`.
+- [x] Implementar `cliente_views.py` para listar, criar, consultar, atualizar e excluir clientes.
+- [x] Implementar `veiculo_views.py` para listar, criar, consultar, atualizar e excluir veículos.
+- [x] Implementar `vaga_views.py` para listar, criar, consultar, atualizar e excluir vagas.
+- [x] Implementar `to_dict()` manual para cada model.
+- [x] Usar `select_related('cliente')` nos veículos.
+- [x] Validar JSON, métodos HTTP, campos obrigatórios e duplicidades.
+- [x] Retornar HTTP 404, 409 e 400 conforme o roteiro.
+- [x] Configurar o include das URLs da API no projeto Django.
+- [x] Testar os endpoints CRUD com requisições locais.
 
 ## Entrega para Theo
 
@@ -27,7 +27,7 @@ API de cadastros e contratos JSON documentados, para que Theo possa conferir a c
 
 ## Status
 
-- [ ] Views CRUD: não iniciado
+- [x] Views CRUD de clientes, veículos e vagas, dashboard, `to_dict` e rotas: concluído (change OpenSpec `views-cadastros-e-dashboard`)
 - [x] Revisão das Tarefas 1 e 2 (fundação e models): concluída no branch `breno/fundacao-django-e-models`
 
 ## Registro: revisão das Tarefas 1 e 2
@@ -54,3 +54,27 @@ Para as próximas etapas (views, serviço, CORS, Docker), o inventário completo
 - o frontend chama `/api/...` sem barra final; as rotas precisam aceitar com e sem barra;
 - o cálculo descarta os segundos antes de arredondar (60 min 59 s custa R$ 5,00);
 - o legado responde 404 para vaga ou permanência inexistente e 409 para conflito; o roteiro manda tratar `ValueError` como 409, então inexistência precisa de uma subclasse própria tratada como 404.
+
+## Registro: views de cadastro e dashboard (Tarefa 3)
+
+Implementado em `aula-projeto-novo/backend-django/`:
+
+- `api/views/cliente_views.py`, `veiculo_views.py`, `vaga_views.py`: CRUD com as mensagens e códigos HTTP do backend Java, na mesma ordem de validação.
+- `api/views/dashboard_views.py`: `GET /api/dashboard` (não tinha dono em `work/`, entrou junto).
+- `api/views/comum.py`: respostas JSON, leitura do corpo, conversão de ID e o tratamento de erro de banco (500).
+- `api/serializacao.py`: `cliente_to_dict`, `veiculo_to_dict`, `vaga_to_dict` e `permanencia_to_dict`.
+- `api/urls.py`: toda rota responde com e sem barra final.
+- Testes em `api/tests/test_api_*.py` e `test_serializacao.py`.
+
+Divergências deliberadas do Java (Tarefa 8 do roteiro ou casos em que o Java não respondia):
+
+- CPF, placa ou número de vaga repetido na **edição**: 409 (Java: 500);
+- veículo com `clienteId` inexistente: 404 `Cliente não encontrado` (Java: 500);
+- `POST` em `/api/<recurso>/<id>`: 405 (Java criava um registro novo ignorando o ID);
+- corpo que não é objeto JSON: 400 `JSON inválido` (Java: sem resposta).
+
+**Para Lemos (Tarefa 5):**
+
+- `api/urls.py` agora aceita barra final também em `/api/permanencias`, `/api/permanencias/entrada` e `/api/permanencias/<id>/saida`. Nomes das views e assinaturas (`saida(request, permanencia_id)` com `int`) não mudaram.
+- `permanencia_to_dict` já está em `api/serializacao.py` (use `select_related('veiculo', 'vaga')`). `valorTotal` sai como número JSON; o cálculo continua em `Decimal`.
+- `api/views/comum.py` tem `responder`, `erro`, `ler_json`, `converter_inteiro` e o decorator `tratar_erro_banco`, prontos para reaproveitar.

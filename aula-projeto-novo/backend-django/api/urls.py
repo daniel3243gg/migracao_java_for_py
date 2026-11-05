@@ -2,15 +2,29 @@ from django.urls import path
 
 from .views import dashboard_views, cliente_views, permanencia_views, vaga_views, veiculo_views
 
+
+def rota(padrao, view):
+    """Registra a rota com e sem barra final.
+
+    O frontend legado chama /api/... sem barra e o roteiro lista as URLs com
+    barra. APPEND_SLASH está desligado porque o redirecionamento perderia o
+    corpo de POST e PUT, então as duas formas são registradas aqui.
+    """
+    return [path(padrao, view), path(padrao + "/", view)]
+
+
 urlpatterns = [
-    path("clientes", cliente_views.lista_clientes),
-    path("clientes/<int:cliente_id>", cliente_views.detalhe_cliente),
-    path("veiculos", veiculo_views.lista_veiculos),
-    path("veiculos/<int:veiculo_id>", veiculo_views.detalhe_veiculo),
-    path("vagas", vaga_views.lista_vagas),
-    path("vagas/<int:vaga_id>", vaga_views.detalhe_vaga),
-    path("permanencias", permanencia_views.lista_permanencias),
-    path("permanencias/entrada", permanencia_views.entrada),
-    path("permanencias/<int:permanencia_id>/saida", permanencia_views.saida),
-    path("dashboard", dashboard_views.dashboard),
+    # Cadastros: o ID chega como texto para a view responder 400 "ID inválido",
+    # como o backend Java fazia, em vez do 404 do conversor <int:>.
+    *rota("clientes", cliente_views.lista_clientes),
+    *rota("clientes/<str:cliente_id>", cliente_views.detalhe_cliente),
+    *rota("veiculos", veiculo_views.lista_veiculos),
+    *rota("veiculos/<str:veiculo_id>", veiculo_views.detalhe_veiculo),
+    *rota("vagas", vaga_views.lista_vagas),
+    *rota("vagas/<str:vaga_id>", vaga_views.detalhe_vaga),
+    # Permanências (Tarefa 5): só a barra final mudou; assinaturas iguais.
+    *rota("permanencias", permanencia_views.lista_permanencias),
+    *rota("permanencias/entrada", permanencia_views.entrada),
+    *rota("permanencias/<int:permanencia_id>/saida", permanencia_views.saida),
+    *rota("dashboard", dashboard_views.dashboard),
 ]
