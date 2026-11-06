@@ -13,6 +13,7 @@ from api.serializacao import (
     vaga_to_dict,
     veiculo_to_dict,
 )
+from api.views.comum import responder
 
 
 class SerializacaoTests(TestCase):
@@ -30,9 +31,11 @@ class SerializacaoTests(TestCase):
         )
 
     def test_veiculo_com_nome_do_cliente(self):
-        veiculo = Veiculo.objects.select_related("cliente").get(pk=self.veiculo.pk)
+        with self.assertNumQueries(1):
+            veiculo = Veiculo.objects.select_related("cliente").get(pk=self.veiculo.pk)
+            dados = veiculo_to_dict(veiculo)
         self.assertEqual(
-            veiculo_to_dict(veiculo),
+            dados,
             {
                 "id": veiculo.id,
                 "placa": "ABC1234",
@@ -52,12 +55,16 @@ class SerializacaoTests(TestCase):
 
     def test_permanencia_aberta(self):
         entrada = datetime(2026, 3, 1, 14, 5, 9)
-        p = Permanencia.objects.create(veiculo=self.veiculo, vaga=self.vaga, data_hora_entrada=entrada)
-        p = Permanencia.objects.select_related("veiculo", "vaga").get(pk=p.pk)
+        registro = Permanencia.objects.create(
+            veiculo=self.veiculo, vaga=self.vaga, data_hora_entrada=entrada
+        )
+        with self.assertNumQueries(1):
+            permanencia = Permanencia.objects.select_related("veiculo", "vaga").get(pk=registro.pk)
+            resposta = responder(permanencia_to_dict(permanencia))
         self.assertEqual(
-            permanencia_to_dict(p),
+            json.loads(resposta.content),
             {
-                "id": p.id,
+                "id": permanencia.id,
                 "veiculoId": self.veiculo.id,
                 "veiculoPlaca": "ABC1234",
                 "veiculoModelo": "Uno",
@@ -71,17 +78,19 @@ class SerializacaoTests(TestCase):
         )
 
     def test_permanencia_finalizada_valor_numerico(self):
-        p = Permanencia.objects.create(
-            veiculo=self.veiculo,
-            vaga=self.vaga,
-            data_hora_entrada=datetime(2026, 3, 1, 14, 0),
-            data_hora_saida=datetime(2026, 3, 1, 16, 30, 0, 250000),
-            valor_total=Decimal("15.00"),
-            status="FINALIZADO",
-        )
-        p.refresh_from_db()
-        dados = permanencia_to_dict(p)
-        self.assertEqual(dados["dataHoraSaida"], "2026-03-01T16:30:00.250000")
-        self.assertEqual(dados["valorTotal"], 15.0)
-        # Número JSON, não texto.
-        self.assertIn('"valorTotal": 15.0', json.dumps(dados))
+        for valor in (Decimal("15.25"), Decimal("0.00")):
+            with self.subTest(valor=valor):
+                permanencia = Permanencia.objects.create(
+                    veiculo=self.veiculo,
+                    vaga=self.vaga,
+                    data_hora_entrada=datetime(2026, 3, 1, 14, 0),
+                    data_hora_saida=datetime(2026, 3, 1, 16, 30, 0, 250000),
+                    valor_total=valor,
+                    status=Permanencia.Status.FINALIZADO,
+                )
+                permanencia.refresh_from_db()
+                resposta = responder(permanencia_to_dict(permanencia))
+                dados = json.loads(resposta.content)
+                self.assertEqual(dados["dataHoraSaida"], "2026-03-01T16:30:00.250000")
+                self.assertIn(type(dados["valorTotal"]), (int, float))
+                self.assertEqual(Decimal(str(dados["valorTotal"])), valor)
