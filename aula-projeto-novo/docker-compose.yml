@@ -1,0 +1,23 @@
+services:
+  # ── Backend Python + Django (SQLite) ───────────────────────────────────────
+  backend:
+    build: ./backend-django
+    container_name: estacionamento-backend
+    ports:
+      - "8080:8080"
+    volumes:
+      - sqlite_data:/app/data   # persiste o db.sqlite3 entre reinicializações
+    restart: unless-stopped
+
+  # ── Frontend Nginx (sem alterações, copiado do legado) ─────────────────────
+  frontend:
+    build: ./frontend
+    container_name: estacionamento-frontend
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend
+    restart: unless-stopped
+
+volumes:
+  sqlite_data:

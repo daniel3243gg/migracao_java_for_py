@@ -1,0 +1,8 @@
+# Não levar banco local, ambientes virtuais nem caches para a imagem
+db.sqlite3
+*.sqlite3
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+.git
