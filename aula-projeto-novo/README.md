@@ -5,10 +5,10 @@ a documentação em `docs/roteiro-migracao.md`.
 
 ## Estado
 
-O backend está em `backend-django/` e contém a configuração Django (Tarefa 1),
-o app `api` com os models e migrations (Tarefa 2), o middleware CORS e os
-pontos de entrada das views e do serviço. Os endpoints serão implementados nas
-próximas etapas.
+O backend está em `backend-django/` com todas as tarefas do roteiro: configuração,
+models e migrations, views e serialização, serviço de permanência (entrada, saída e
+cálculo da tarifa), CORS, Docker e validações. O frontend em `frontend/` é uma cópia
+sem alterações do `aula-projeto-legado`.
 
 - Python 3.11 ou superior (o Docker usa 3.11; 3.14 local também funciona).
 - Django 5.2 LTS (`Django>=5.2,<6.0`), única dependência.
@@ -48,3 +48,30 @@ cd backend-django
 rm -f db.sqlite3
 python manage.py migrate
 ```
+
+## Docker (Tarefa 7)
+
+O `docker-compose.yml` sobe só o backend Django e o frontend Nginx; não há mais
+PostgreSQL. O SQLite fica no volume `sqlite_data` (`/app/data/db.sqlite3`) e o
+`migrate` roda sempre que o container inicia.
+
+```bash
+docker compose up --build -d     # frontend em http://localhost:3000, API em http://localhost:8080
+docker compose restart           # os dados continuam lá
+docker compose down -v           # apaga também o volume do banco
+```
+
+## Permanências e validações (Tarefas 5 e 8)
+
+| Situação | HTTP | Mensagem |
+| --- | --- | --- |
+| `veiculoId` ou `vagaId` ausente/inválido | 400 | `Campos 'veiculoId' e 'vagaId' são obrigatórios` |
+| Veículo já estacionado | 409 | `Veículo já possui uma permanência em aberto.` |
+| Vaga ocupada | 409 | `Vaga já está ocupada.` |
+| Vaga ou veículo inexistente | 404 | `Vaga não encontrada.` / `Veículo não encontrado.` |
+| Saída de permanência inexistente | 404 | `Permanência não encontrada.` |
+| Saída de permanência já finalizada | 409 | `Permanência já foi finalizada.` |
+
+Tarifa: R$ 5,00 por hora, mínimo de 1 hora, frações arredondadas para cima com
+`math.ceil`, tudo em `Decimal`. Os cadastros já validavam campos obrigatórios,
+`tipo` de vaga e duplicidade de CPF, placa e número de vaga (409).
