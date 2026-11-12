@@ -6,7 +6,6 @@ Quem consulta veículos ou permanências deve usar select_related para evitar N+
 
 
 def _data(valor):
-    # LocalDateTime em ISO 8601 sem fuso, como o JsonUtil do legado.
     return valor.isoformat() if valor is not None else None
 
 
@@ -52,8 +51,6 @@ def permanencia_to_dict(permanencia):
         "vagaNumero": permanencia.vaga.numero,
         "dataHoraEntrada": _data(permanencia.data_hora_entrada),
         "dataHoraSaida": _data(permanencia.data_hora_saida),
-        # O contrato do legado é número JSON. O cálculo continua em Decimal no
-        # serviço; a conversão acontece só aqui, na saída.
         "valorTotal": float(valor) if valor is not None else None,
         "status": permanencia.status,
     }

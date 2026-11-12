@@ -14,15 +14,12 @@ def rota(padrao, view):
 
 
 urlpatterns = [
-    # Cadastros: o ID chega como texto para a view responder 400 "ID inválido",
-    # como o backend Java fazia, em vez do 404 do conversor <int:>.
     *rota("clientes", cliente_views.lista_clientes),
     *rota("clientes/<str:cliente_id>", cliente_views.detalhe_cliente),
     *rota("veiculos", veiculo_views.lista_veiculos),
     *rota("veiculos/<str:veiculo_id>", veiculo_views.detalhe_veiculo),
     *rota("vagas", vaga_views.lista_vagas),
     *rota("vagas/<str:vaga_id>", vaga_views.detalhe_vaga),
-    # Permanências (Tarefa 5): só a barra final mudou; assinaturas iguais.
     *rota("permanencias", permanencia_views.lista_permanencias),
     *rota("permanencias/entrada", permanencia_views.entrada),
     *rota("permanencias/<int:permanencia_id>/saida", permanencia_views.saida),

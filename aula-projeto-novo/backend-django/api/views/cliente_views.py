@@ -20,7 +20,6 @@ CPF_DUPLICADO = "CPF já cadastrado"
 
 
 def _opcional(valor):
-    # O Gson convertia número em texto; None continua None (campo omitido vira NULL).
     if valor is None or isinstance(valor, str):
         return valor
     return str(valor)
@@ -36,7 +35,6 @@ def _validar(dados):
 
 
 def _preencher(cliente, dados):
-    # Valores gravados como recebidos; o strip só serve para validar.
     cliente.nome = dados["nome"]
     cliente.cpf = dados["cpf"]
     cliente.telefone = _opcional(dados.get("telefone"))
@@ -73,7 +71,6 @@ def lista_clientes(request):
 
 @tratar_erro_banco
 def detalhe_cliente(request, cliente_id):
-    # Método antes do ID, como o switch do Java. POST em item não cria nada.
     if request.method not in ("GET", "PUT", "DELETE"):
         return erro("Método não permitido", 405)
     pk = converter_id(cliente_id)
@@ -98,7 +95,6 @@ def detalhe_cliente(request, cliente_id):
             cliente = Cliente.objects.get(pk=pk)
         except Cliente.DoesNotExist:
             return erro(NAO_ENCONTRADO, 404)
-        # No Java a edição com CPF repetido dava 500; a Tarefa 8 pede 409.
         if Cliente.objects.filter(cpf=dados["cpf"]).exclude(pk=pk).exists():
             return erro(CPF_DUPLICADO, 409)
         _preencher(cliente, dados)
@@ -108,8 +104,6 @@ def detalhe_cliente(request, cliente_id):
             return erro(CPF_DUPLICADO, 409)
         return responder(cliente_to_dict(cliente))
 
-    # DELETE: veículos sem histórico vão junto (CASCADE); veículo com
-    # permanência bloqueia tudo (PROTECT), sem exclusão parcial.
     try:
         cliente = Cliente.objects.get(pk=pk)
     except Cliente.DoesNotExist:

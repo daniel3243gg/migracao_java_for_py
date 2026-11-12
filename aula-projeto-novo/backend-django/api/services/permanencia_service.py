@@ -21,20 +21,20 @@ class NaoEncontrado(ValueError):
     """Veículo, vaga ou permanência inexistente (HTTP 404)."""
 
 
-def registrar_entrada(veiculo_id, vaga_id):
-    # atomic substitui o setAutoCommit(false)/commit/rollback do JDBC: a vaga
-    # ocupada e a permanência criada são gravadas juntas ou nenhuma é gravada.
+def registrar_entrada(veiculo_id, vaga_id, data_hora_entrada=None):
+    """Registra uma entrada usando o horário informado ou o horário atual.
+
+    ``data_hora_entrada`` é opcional para manter compatibilidade com o
+    frontend existente. Quando informado, já deve ser um ``datetime`` válido;
+    a conversão do JSON acontece na view.
+    """
     with transaction.atomic():
-        # 1. Veículo já estacionado?
         if Permanencia.objects.filter(veiculo_id=veiculo_id, status=Permanencia.Status.ABERTO).exists():
             raise ValueError("Veículo já possui uma permanência em aberto.")
 
-        # No Java o veículo inexistente estourava a FK e virava 500;
-        # a Tarefa 8 pede 404 para recurso inexistente.
         if not Veiculo.objects.filter(id=veiculo_id).exists():
             raise NaoEncontrado("Veículo não encontrado.")
 
-        # 2. Vaga existe e está livre? (select_for_update = SELECT ... FOR UPDATE do legado)
         try:
             vaga = Vaga.objects.select_for_update().get(id=vaga_id)
         except Vaga.DoesNotExist:
@@ -42,15 +42,13 @@ def registrar_entrada(veiculo_id, vaga_id):
         if vaga.status != Vaga.Status.LIVRE:
             raise ValueError("Vaga já está ocupada.")
 
-        # 3. Ocupa a vaga
         vaga.status = Vaga.Status.OCUPADA
         vaga.save()
 
-        # 4. Abre a permanência
         permanencia = Permanencia.objects.create(
             veiculo_id=veiculo_id,
             vaga=vaga,
-            data_hora_entrada=datetime.now(),
+            data_hora_entrada=data_hora_entrada or datetime.now(),
             status=Permanencia.Status.ABERTO,
         )
 
@@ -59,7 +57,6 @@ def registrar_entrada(veiculo_id, vaga_id):
 
 def registrar_saida(permanencia_id):
     with transaction.atomic():
-        # 1. Permanência existe e está aberta?
         try:
             permanencia = (
                 Permanencia.objects.select_for_update()
@@ -71,17 +68,14 @@ def registrar_saida(permanencia_id):
         if permanencia.status != Permanencia.Status.ABERTO:
             raise ValueError("Permanência já foi finalizada.")
 
-        # 2. Calcula o valor
         saida = datetime.now()
         valor = _calcular_valor(permanencia.data_hora_entrada, saida)
 
-        # 3. Finaliza a permanência
         permanencia.data_hora_saida = saida
         permanencia.valor_total = valor
         permanencia.status = Permanencia.Status.FINALIZADO
         permanencia.save()
 
-        # 4. Libera a vaga
         vaga = permanencia.vaga
         vaga.status = Vaga.Status.LIVRE
         vaga.save()
@@ -90,11 +84,7 @@ def registrar_saida(permanencia_id):
 
 
 def _calcular_valor(entrada, saida):
-    """R$ 5,00 por hora, frações arredondadas para cima, mínimo de 1 hora.
 
-    Como o ChronoUnit.MINUTES.between do Java, conta só minutos inteiros
-    (os segundos são descartados antes de arredondar).
-    """
     minutos = int((saida - entrada).total_seconds() // 60)
     horas = max(1, math.ceil(minutos / 60))
     return TARIFA_POR_HORA * horas

@@ -69,6 +69,29 @@ class EntradaTests(PermanenciaBase):
         resposta = self.post("/api/permanencias/entrada", {"veiculoId": str(self.veiculo.id), "vagaId": str(self.vaga.id)})
         self.assertEqual(resposta.status_code, 201)
 
+    def test_horario_de_entrada_informado_pelo_frontend(self):
+        resposta = self.post(
+            "/api/permanencias/entrada",
+            {
+                "veiculoId": self.veiculo.id,
+                "vagaId": self.vaga.id,
+                "dataHoraEntrada": "2026-11-12T12:10:07.702269",
+            },
+        )
+        self.assertEqual(resposta.status_code, 201)
+        self.assertEqual(resposta.json()["dataHoraEntrada"], "2026-11-12T12:10:07.702269")
+
+    def test_horario_de_entrada_invalido(self):
+        resposta = self.post(
+            "/api/permanencias/entrada",
+            {
+                "veiculoId": self.veiculo.id,
+                "vagaId": self.vaga.id,
+                "dataHoraEntrada": "12h10",
+            },
+        )
+        self.assertErro(resposta, 400, "Campo 'dataHoraEntrada' inválido")
+
     def test_campos_obrigatorios(self):
         mensagem = "Campos 'veiculoId' e 'vagaId' são obrigatórios"
         self.assertErro(self.post("/api/permanencias/entrada", {}), 400, mensagem)

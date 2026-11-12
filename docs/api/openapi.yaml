@@ -401,7 +401,7 @@ paths:
             application/json:
               schema: { $ref: '#/components/schemas/Permanencia' }
         '400':
-          description: "veiculoId ou vagaId ausente, inválido ou JSON malformado."
+          description: "veiculoId ou vagaId ausente, inválido, dataHoraEntrada inválida ou JSON malformado."
           content:
             application/json:
               schema: { $ref: '#/components/schemas/Erro' }
@@ -647,6 +647,11 @@ components:
         vagaId:
           type: integer
           format: int64
+        dataHoraEntrada:
+          type: string
+          format: date-time
+          description: Horário opcional enviado pelo frontend. Se omitido, usa o horário atual do servidor.
+          example: '2026-11-12T12:10:07.702269'
     Permanencia:
       type: object
       required: [id, veiculoId, vagaId, dataHoraEntrada, status]

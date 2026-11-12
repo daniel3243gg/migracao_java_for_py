@@ -33,7 +33,6 @@ def _validar(dados):
 
 
 def _preencher(veiculo, dados):
-    # Valores gravados como recebidos (placa não é convertida para maiúsculas).
     for campo in CAMPOS_TEXTO:
         setattr(veiculo, campo, dados[campo])
     veiculo.cliente_id = converter_inteiro(dados["clienteId"])
@@ -52,7 +51,6 @@ def _salvar(veiculo, dados, pk_atual=None):
     if repetida.exists():
         return erro(PLACA_DUPLICADA, 409)
     if not Cliente.objects.filter(pk=converter_inteiro(dados["clienteId"])).exists():
-        # No Java era 500 (FK); a Tarefa 8 pede 404 para recurso inexistente.
         return erro(CLIENTE_NAO_ENCONTRADO, 404)
     _preencher(veiculo, dados)
     try:
@@ -112,7 +110,6 @@ def detalhe_veiculo(request, veiculo_id):
             return erro(NAO_ENCONTRADO, 404)
         return _salvar(veiculo, dados, pk_atual=pk)
 
-    # DELETE: qualquer permanência (aberta ou finalizada) bloqueia.
     try:
         veiculo = Veiculo.objects.get(pk=pk)
     except Veiculo.DoesNotExist:

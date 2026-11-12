@@ -113,7 +113,6 @@ const Permanencias = (() => {
     }
   }
 
-  // ─── helpers ────────────────────────────────────────────────────────────────
 
   function formatDateTime(isoStr) {
     if (!isoStr) return '–';

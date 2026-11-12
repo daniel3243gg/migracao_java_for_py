@@ -44,8 +44,6 @@ class VeiculoTests(TestCase):
             criar_veiculo(cliente)
 
     def test_cliente_inexistente_viola_fk(self):
-        # No SQLite as FKs são DEFERRABLE INITIALLY DEFERRED: a violação só
-        # aparece na checagem de constraints (ou no commit).
         Veiculo.objects.create(placa="XYZ9999", marca="Fiat", modelo="Uno", cor="Preto", cliente_id=999999)
         with self.assertRaises(IntegrityError):
             connection.check_constraints(table_names=["veiculos"])

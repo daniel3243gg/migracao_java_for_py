@@ -16,7 +16,6 @@ class CorpoInvalido(Exception):
 
 
 def responder(dados, status=200):
-    # ensure_ascii=False e charset explícito: igual ao Gson, que devolvia UTF-8 sem escapes.
     return JsonResponse(
         dados,
         status=status,

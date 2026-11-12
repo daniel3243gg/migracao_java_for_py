@@ -24,7 +24,6 @@ STATUSES = ("LIVRE", "OCUPADA")
 def _validar(dados):
     if not texto_preenchido(dados.get("numero")):
         return "Campo 'numero' é obrigatório"
-    # Comparação exata, como TIPOS.contains() no Java ("carro" é inválido).
     if dados.get("tipo") not in TIPOS:
         return "Campo 'tipo' deve ser CARRO ou MOTO"
     return None
@@ -35,7 +34,6 @@ def _salvar(vaga, dados, pk_atual=None):
     if pk_atual is not None:
         repetida = repetida.exclude(pk=pk_atual)
     if repetida.exists():
-        # Na edição o Java dava 500; a Tarefa 8 pede 409.
         return erro(NUMERO_DUPLICADO, 409)
     vaga.numero = dados["numero"]
     vaga.tipo = dados["tipo"]
@@ -51,7 +49,6 @@ def lista_vagas(request):
     if request.method == "GET":
         vagas = Vaga.objects.order_by("numero")
         status = request.GET.get("status")
-        # Filtro vazio é ignorado; valor desconhecido devolve lista vazia.
         if status:
             vagas = vagas.filter(status=status)
         return responder([vaga_to_dict(v) for v in vagas])
@@ -64,7 +61,6 @@ def lista_vagas(request):
         mensagem = _validar(dados)
         if mensagem:
             return erro(mensagem, 400)
-        # Cadastro sempre LIVRE, ignorando o status enviado.
         return _salvar(Vaga(status=Vaga.Status.LIVRE), dados)
 
     if request.method in ("PUT", "DELETE"):
@@ -98,8 +94,6 @@ def detalhe_vaga(request, vaga_id):
             vaga = Vaga.objects.get(pk=pk)
         except Vaga.DoesNotExist:
             return erro(NAO_ENCONTRADA, 404)
-        # Status ausente ou inválido vira LIVRE; status válido é aceito como veio,
-        # inclusive OCUPADA sem permanência (edição administrativa do legado).
         status = dados.get("status")
         vaga.status = status if status in STATUSES else Vaga.Status.LIVRE
         return _salvar(vaga, dados, pk_atual=pk)

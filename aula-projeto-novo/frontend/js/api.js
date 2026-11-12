@@ -1,6 +1,3 @@
-/**
- * Wrapper simples para a Fetch API.
- */
 const API = {
   async _request(method, url, data) {
     const options = { method, headers: {} };
@@ -10,7 +7,6 @@ const API = {
     }
     const res = await fetch(url, options);
 
-    // Sem corpo (204)
     if (res.status === 204) return null;
 
     const json = await res.json().catch(() => null);

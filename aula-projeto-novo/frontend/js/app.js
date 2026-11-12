@@ -1,6 +1,3 @@
-// ── Utilitários globais ───────────────────────────────────────────────────────
-
-/** Escapa HTML para evitar XSS */
 function esc(str) {
   if (str == null) return '';
   return String(str)
@@ -11,7 +8,6 @@ function esc(str) {
     .replace(/'/g, '&#39;');
 }
 
-// ── Toast ─────────────────────────────────────────────────────────────────────
 
 let _toastTimer = null;
 
@@ -23,7 +19,6 @@ function showToast(msg, type = 'success') {
   _toastTimer = setTimeout(() => { el.className = 'toast hidden'; }, 3500);
 }
 
-// ── Modal ─────────────────────────────────────────────────────────────────────
 
 function openModal(title, bodyHtml) {
   document.getElementById('modal-title').textContent = title;
@@ -40,7 +35,6 @@ function closeModalOverlay(event) {
   if (event.target === document.getElementById('modal-overlay')) closeModal();
 }
 
-// ── Navegação ─────────────────────────────────────────────────────────────────
 
 const sectionLoaders = {
   dashboard:      loadDashboard,
@@ -52,17 +46,14 @@ const sectionLoaders = {
 };
 
 function navigateTo(sectionId) {
-  // Atualiza links
   document.querySelectorAll('.nav-link').forEach(el => {
     el.classList.toggle('active', el.dataset.section === sectionId);
   });
 
-  // Troca seção visível
   document.querySelectorAll('.section').forEach(el => {
     el.classList.toggle('active', el.id === sectionId);
   });
 
-  // Carrega dados
   const loader = sectionLoaders[sectionId];
   if (loader) loader();
 }
@@ -87,10 +78,8 @@ async function loadEstacionamento() {
   ]);
 }
 
-// ── Init ──────────────────────────────────────────────────────────────────────
 
 document.addEventListener('DOMContentLoaded', () => {
-  // Clique nos links do menu
   document.querySelectorAll('.nav-link').forEach(link => {
     link.addEventListener('click', e => {
       e.preventDefault();
@@ -98,6 +87,5 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
-  // Carrega a seção inicial
   navigateTo('dashboard');
 });

@@ -1,0 +1,416 @@
+_type: export
+__export_format: 4
+__export_date: '2026-11-12T00:00:00.000Z'
+__export_source: estacionamento-api-python:1.0.0
+resources:
+  - _id: wrk_estacionamento_python
+    parentId: null
+    modified: 1794441600000
+    created: 1794441600000
+    name: Estacionamento - API Python
+    description: Coleção da API Django da nova versão do sistema de estacionamento.
+    scope: collection
+    _type: workspace
+
+  - _id: env_estacionamento_python_base
+    parentId: wrk_estacionamento_python
+    modified: 1794441600000
+    created: 1794441600000
+    name: Base Environment
+    data:
+      base_url: http://localhost:8080
+      cliente_id: 1
+      veiculo_id: 1
+      vaga_id: 1
+      permanencia_id: 1
+    dataPropertyOrder:
+      '<<root>>':
+        - base_url
+        - cliente_id
+        - veiculo_id
+        - vaga_id
+        - permanencia_id
+    color: null
+    isPrivate: false
+    metaSortKey: 0
+    _type: environment
+
+  - _id: fld_estacionamento_health
+    parentId: wrk_estacionamento_python
+    modified: 1794441600000
+    created: 1794441600000
+    name: Health e Dashboard
+    description: |
+      Endpoints públicos de verificação e indicadores.
+    environment: {}
+    environmentPropertyOrder: null
+    metaSortKey: -600
+    _type: request_group
+
+  - _id: req_estacionamento_health
+    parentId: fld_estacionamento_health
+    modified: 1794441600000
+    created: 1794441600000
+    name: Health check
+    description: Verifica se a API está respondendo.
+    method: GET
+    headers: []
+    settings:
+      renderRequestBody: true
+      encodeUrl: true
+      followRedirects: global
+      cookies: send
+      rebuildPath: true
+    url: '{{ _.base_url }}/health'
+    _type: request
+
+  - _id: req_estacionamento_dashboard
+    parentId: fld_estacionamento_health
+    modified: 1794441600000
+    created: 1794441600000
+    name: Dashboard
+    description: Retorna totais de vagas e veículos estacionados.
+    method: GET
+    headers: []
+    settings:
+      renderRequestBody: true
+      encodeUrl: true
+      followRedirects: global
+      cookies: send
+      rebuildPath: true
+    url: '{{ _.base_url }}/api/dashboard'
+    _type: request
+
+  - _id: fld_estacionamento_clientes
+    parentId: wrk_estacionamento_python
+    modified: 1794441600000
+    created: 1794441600000
+    name: Clientes
+    description: Cadastro e manutenção de clientes.
+    environment: {}
+    environmentPropertyOrder: null
+    metaSortKey: -500
+    _type: request_group
+
+  - _id: req_clientes_listar
+    parentId: fld_estacionamento_clientes
+    modified: 1794441600000
+    created: 1794441600000
+    name: Listar clientes
+    method: GET
+    headers: []
+    settings: {renderRequestBody: true, encodeUrl: true, followRedirects: global, cookies: send, rebuildPath: true}
+    url: '{{ _.base_url }}/api/clientes'
+    _type: request
+
+  - _id: req_clientes_criar
+    parentId: fld_estacionamento_clientes
+    modified: 1794441600000
+    created: 1794441600000
+    name: Criar cliente
+    method: POST
+    body:
+      mimeType: application/json
+      text: |-
+        {
+          "nome": "Ana Souza",
+          "cpf": "123.456.789-00",
+          "telefone": "11999999999",
+          "email": "ana@example.com"
+        }
+    headers:
+      - id: pair_clientes_criar_content_type
+        name: Content-Type
+        value: application/json
+    settings: {renderRequestBody: true, encodeUrl: true, followRedirects: global, cookies: send, rebuildPath: true}
+    url: '{{ _.base_url }}/api/clientes'
+    _type: request
+
+  - _id: req_clientes_consultar
+    parentId: fld_estacionamento_clientes
+    modified: 1794441600000
+    created: 1794441600000
+    name: Consultar cliente por ID
+    method: GET
+    headers: []
+    settings: {renderRequestBody: true, encodeUrl: true, followRedirects: global, cookies: send, rebuildPath: true}
+    url: '{{ _.base_url }}/api/clientes/{{ _.cliente_id }}'
+    _type: request
+
+  - _id: req_clientes_atualizar
+    parentId: fld_estacionamento_clientes
+    modified: 1794441600000
+    created: 1794441600000
+    name: Atualizar cliente
+    method: PUT
+    body:
+      mimeType: application/json
+      text: |-
+        {
+          "nome": "Ana Souza Atualizada",
+          "cpf": "123.456.789-00",
+          "telefone": "11988888888",
+          "email": "ana.nova@example.com"
+        }
+    headers:
+      - id: pair_clientes_atualizar_content_type
+        name: Content-Type
+        value: application/json
+    settings: {renderRequestBody: true, encodeUrl: true, followRedirects: global, cookies: send, rebuildPath: true}
+    url: '{{ _.base_url }}/api/clientes/{{ _.cliente_id }}'
+    _type: request
+
+  - _id: req_clientes_excluir
+    parentId: fld_estacionamento_clientes
+    modified: 1794441600000
+    created: 1794441600000
+    name: Excluir cliente
+    method: DELETE
+    headers: []
+    settings: {renderRequestBody: true, encodeUrl: true, followRedirects: global, cookies: send, rebuildPath: true}
+    url: '{{ _.base_url }}/api/clientes/{{ _.cliente_id }}'
+    _type: request
+
+  - _id: fld_estacionamento_veiculos
+    parentId: wrk_estacionamento_python
+    modified: 1794441600000
+    created: 1794441600000
+    name: Veículos
+    description: Cadastro e manutenção de veículos.
+    environment: {}
+    environmentPropertyOrder: null
+    metaSortKey: -400
+    _type: request_group
+
+  - _id: req_veiculos_listar
+    parentId: fld_estacionamento_veiculos
+    modified: 1794441600000
+    created: 1794441600000
+    name: Listar veículos
+    method: GET
+    headers: []
+    settings: {renderRequestBody: true, encodeUrl: true, followRedirects: global, cookies: send, rebuildPath: true}
+    url: '{{ _.base_url }}/api/veiculos'
+    _type: request
+
+  - _id: req_veiculos_criar
+    parentId: fld_estacionamento_veiculos
+    modified: 1794441600000
+    created: 1794441600000
+    name: Criar veículo
+    method: POST
+    body:
+      mimeType: application/json
+      text: |-
+        {
+          "placa": "ABC1D23",
+          "marca": "Fiat",
+          "modelo": "Uno",
+          "cor": "Branco",
+          "clienteId": {{ _.cliente_id }}
+        }
+    headers:
+      - id: pair_veiculos_criar_content_type
+        name: Content-Type
+        value: application/json
+    settings: {renderRequestBody: true, encodeUrl: true, followRedirects: global, cookies: send, rebuildPath: true}
+    url: '{{ _.base_url }}/api/veiculos'
+    _type: request
+
+  - _id: req_veiculos_consultar
+    parentId: fld_estacionamento_veiculos
+    modified: 1794441600000
+    created: 1794441600000
+    name: Consultar veículo por ID
+    method: GET
+    headers: []
+    settings: {renderRequestBody: true, encodeUrl: true, followRedirects: global, cookies: send, rebuildPath: true}
+    url: '{{ _.base_url }}/api/veiculos/{{ _.veiculo_id }}'
+    _type: request
+
+  - _id: req_veiculos_atualizar
+    parentId: fld_estacionamento_veiculos
+    modified: 1794441600000
+    created: 1794441600000
+    name: Atualizar veículo
+    method: PUT
+    body:
+      mimeType: application/json
+      text: |-
+        {
+          "placa": "ABC1D23",
+          "marca": "Fiat",
+          "modelo": "Uno Mille",
+          "cor": "Prata",
+          "clienteId": {{ _.cliente_id }}
+        }
+    headers:
+      - id: pair_veiculos_atualizar_content_type
+        name: Content-Type
+        value: application/json
+    settings: {renderRequestBody: true, encodeUrl: true, followRedirects: global, cookies: send, rebuildPath: true}
+    url: '{{ _.base_url }}/api/veiculos/{{ _.veiculo_id }}'
+    _type: request
+
+  - _id: req_veiculos_excluir
+    parentId: fld_estacionamento_veiculos
+    modified: 1794441600000
+    created: 1794441600000
+    name: Excluir veículo
+    method: DELETE
+    headers: []
+    settings: {renderRequestBody: true, encodeUrl: true, followRedirects: global, cookies: send, rebuildPath: true}
+    url: '{{ _.base_url }}/api/veiculos/{{ _.veiculo_id }}'
+    _type: request
+
+  - _id: fld_estacionamento_vagas
+    parentId: wrk_estacionamento_python
+    modified: 1794441600000
+    created: 1794441600000
+    name: Vagas
+    description: Cadastro, consulta e filtro de vagas.
+    environment: {}
+    environmentPropertyOrder: null
+    metaSortKey: -300
+    _type: request_group
+
+  - _id: req_vagas_listar
+    parentId: fld_estacionamento_vagas
+    modified: 1794441600000
+    created: 1794441600000
+    name: Listar vagas
+    method: GET
+    parameters:
+      - id: pair_vagas_status
+        name: status
+        value: LIVRE
+        disabled: true
+    headers: []
+    settings: {renderRequestBody: true, encodeUrl: true, followRedirects: global, cookies: send, rebuildPath: true}
+    url: '{{ _.base_url }}/api/vagas'
+    _type: request
+
+  - _id: req_vagas_criar
+    parentId: fld_estacionamento_vagas
+    modified: 1794441600000
+    created: 1794441600000
+    name: Criar vaga
+    method: POST
+    body:
+      mimeType: application/json
+      text: |-
+        {
+          "numero": "C01",
+          "tipo": "CARRO"
+        }
+    headers:
+      - id: pair_vagas_criar_content_type
+        name: Content-Type
+        value: application/json
+    settings: {renderRequestBody: true, encodeUrl: true, followRedirects: global, cookies: send, rebuildPath: true}
+    url: '{{ _.base_url }}/api/vagas'
+    _type: request
+
+  - _id: req_vagas_consultar
+    parentId: fld_estacionamento_vagas
+    modified: 1794441600000
+    created: 1794441600000
+    name: Consultar vaga por ID
+    method: GET
+    headers: []
+    settings: {renderRequestBody: true, encodeUrl: true, followRedirects: global, cookies: send, rebuildPath: true}
+    url: '{{ _.base_url }}/api/vagas/{{ _.vaga_id }}'
+    _type: request
+
+  - _id: req_vagas_atualizar
+    parentId: fld_estacionamento_vagas
+    modified: 1794441600000
+    created: 1794441600000
+    name: Atualizar vaga
+    method: PUT
+    body:
+      mimeType: application/json
+      text: |-
+        {
+          "numero": "C01",
+          "tipo": "CARRO",
+          "status": "LIVRE"
+        }
+    headers:
+      - id: pair_vagas_atualizar_content_type
+        name: Content-Type
+        value: application/json
+    settings: {renderRequestBody: true, encodeUrl: true, followRedirects: global, cookies: send, rebuildPath: true}
+    url: '{{ _.base_url }}/api/vagas/{{ _.vaga_id }}'
+    _type: request
+
+  - _id: req_vagas_excluir
+    parentId: fld_estacionamento_vagas
+    modified: 1794441600000
+    created: 1794441600000
+    name: Excluir vaga
+    method: DELETE
+    headers: []
+    settings: {renderRequestBody: true, encodeUrl: true, followRedirects: global, cookies: send, rebuildPath: true}
+    url: '{{ _.base_url }}/api/vagas/{{ _.vaga_id }}'
+    _type: request
+
+  - _id: fld_estacionamento_permanencias
+    parentId: wrk_estacionamento_python
+    modified: 1794441600000
+    created: 1794441600000
+    name: Permanências
+    description: Entrada, consulta e saída de veículos.
+    environment: {}
+    environmentPropertyOrder: null
+    metaSortKey: -200
+    _type: request_group
+
+  - _id: req_permanencias_listar
+    parentId: fld_estacionamento_permanencias
+    modified: 1794441600000
+    created: 1794441600000
+    name: Listar permanências
+    method: GET
+    parameters:
+      - id: pair_permanencias_status
+        name: status
+        value: ABERTO
+        disabled: true
+    headers: []
+    settings: {renderRequestBody: true, encodeUrl: true, followRedirects: global, cookies: send, rebuildPath: true}
+    url: '{{ _.base_url }}/api/permanencias'
+    _type: request
+
+  - _id: req_permanencias_entrada
+    parentId: fld_estacionamento_permanencias
+    modified: 1794441600000
+    created: 1794441600000
+    name: Registrar entrada
+    method: POST
+    body:
+      mimeType: application/json
+      text: |-
+        {
+          "veiculoId": {{ _.veiculo_id }},
+          "vagaId": {{ _.vaga_id }},
+          "dataHoraEntrada": "2026-11-12T12:10:07.702269"
+        }
+    headers:
+      - id: pair_permanencias_entrada_content_type
+        name: Content-Type
+        value: application/json
+    settings: {renderRequestBody: true, encodeUrl: true, followRedirects: global, cookies: send, rebuildPath: true}
+    url: '{{ _.base_url }}/api/permanencias/entrada'
+    _type: request
+
+  - _id: req_permanencias_saida
+    parentId: fld_estacionamento_permanencias
+    modified: 1794441600000
+    created: 1794441600000
+    name: Registrar saída
+    method: PUT
+    headers: []
+    settings: {renderRequestBody: true, encodeUrl: true, followRedirects: global, cookies: send, rebuildPath: true}
+    url: '{{ _.base_url }}/api/permanencias/{{ _.permanencia_id }}/saida'
+    _type: request

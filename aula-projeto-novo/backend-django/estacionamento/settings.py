@@ -6,7 +6,6 @@ SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY", "dev-only-key")
 DEBUG = os.environ.get("DJANGO_DEBUG", "1") == "1"
 ALLOWED_HOSTS = [host for host in os.environ.get("ALLOWED_HOSTS", "*").split(",") if host]
 
-# Sem auth, sessions e messages: o roteiro proíbe autenticação e sessões do Django.
 INSTALLED_APPS = [
     "django.contrib.contenttypes",
     "django.contrib.staticfiles",
@@ -50,5 +49,4 @@ STATIC_URL = "static/"
 STATIC_ROOT = BASE_DIR / "staticfiles"
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
-# A API mantém as URLs sem barra final, como no frontend legado.
 APPEND_SLASH = False
